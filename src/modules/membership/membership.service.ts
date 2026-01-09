@@ -1,3 +1,4 @@
+import cloudinary from "../../config/cloudinary";
 import { pool } from "../../config/db";
 import { createToken } from "../../lib/jwt";
 import { PasswordService } from "../../services/password.service";
@@ -10,22 +11,96 @@ export class MembershipService {
     this.passwordService = new PasswordService();
   }
 
-  getUsers = async () => {
-    const users = `
-      SELECT 
-        id,
-        email,
-        first_name,
-        last_name,
-        profile_image,
-        balance,
-        created_at
-      FROM users
-      ORDER BY created_at DESC
-    `;
+  getProfile = async (email: string) => {
+    const result = await pool.query(
+      `
+    SELECT 
+      email,
+      first_name,
+      last_name,
+      profile_image
+    FROM users
+    WHERE email = $1
+    `,
+      [email]
+    );
 
-    const result = await pool.query(users);
+    if ((result.rowCount ?? 0) === 0) {
+      throw new ApiError("User not found", 404);
+    }
     return result.rows;
+  };
+
+  updateProfile = async (
+    email: string,
+    payload: {
+      first_name?: string;
+      last_name?: string;
+    }
+  ) => {
+    const { first_name, last_name } = payload;
+
+    if (!first_name && !last_name) {
+      throw new ApiError("No data provided to update", 400);
+    }
+
+    const result = await pool.query(
+      `
+    UPDATE users
+    SET
+      first_name = COALESCE($1, first_name),
+      last_name = COALESCE($2, last_name)
+    WHERE email = $3
+    RETURNING 
+      email,
+      first_name,
+      last_name
+    `,
+      [first_name, last_name, email]
+    );
+
+    if ((result.rowCount ?? 0) === 0) {
+      throw new ApiError("User not found", 404);
+    }
+
+    return result.rows[0];
+  };
+
+  updateProfileImage = async (email: string, file: Express.Multer.File) => {
+    if (!file) {
+      throw new ApiError("Image is required", 400);
+    }
+
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream({ folder: "profiles" }, (error, result) => {
+          if (error || !result) {
+            return reject(new ApiError("Failed to upload image", 500));
+          }
+          resolve(result);
+        })
+        .end(file.buffer);
+    });
+
+    const updateResult = await pool.query(
+      `
+    UPDATE users
+    SET profile_image = $1
+    WHERE email = $2
+    RETURNING 
+      email,
+      first_name,
+      last_name,
+      profile_image
+    `,
+      [uploadResult.secure_url, email]
+    );
+
+    if ((updateResult.rowCount ?? 0) === 0) {
+      throw new ApiError("User not found", 404);
+    }
+
+    return updateResult.rows[0];
   };
 
   registration = async (payload: {
@@ -134,6 +209,6 @@ export class MembershipService {
       options: { expiresIn: "1h" },
     });
 
-    return {payload, token};
+    return { payload, token };
   };
 }

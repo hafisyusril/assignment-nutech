@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/api-error";
+import { ValidationError } from "class-validator";
 
 export const errorMiddleware = (
   err: any,
@@ -10,6 +11,18 @@ export const errorMiddleware = (
   let httpStatus = 500;
   let code = 1;
   let message = "Internal Server Error";
+
+  // DTO Validation Error 
+  if (Array.isArray(err) && err[0] instanceof ValidationError) {
+    const messages = err
+      .map(e => Object.values(e.constraints || {}).join(", "))
+      .join("; ");
+    return res.status(400).json({
+      status: 102, 
+      message: messages,
+      data: null
+    });
+  }
 
   // JWT Error
   if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {

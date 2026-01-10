@@ -26,7 +26,7 @@ export class MembershipService {
     );
 
     if ((result.rowCount ?? 0) === 0) {
-      throw new ApiError("User not found", 404);
+      throw new ApiError("User not found", 404, 1);
     }
     return result.rows;
   };
@@ -41,7 +41,7 @@ export class MembershipService {
     const { first_name, last_name } = payload;
 
     if (!first_name && !last_name) {
-      throw new ApiError("No data provided to update", 400);
+      throw new ApiError("No data provided to update", 400, 1);
     }
 
     const result = await pool.query(
@@ -60,7 +60,7 @@ export class MembershipService {
     );
 
     if ((result.rowCount ?? 0) === 0) {
-      throw new ApiError("User not found", 404);
+      throw new ApiError("User not found", 404, 1);
     }
 
     return result.rows[0];
@@ -68,14 +68,14 @@ export class MembershipService {
 
   updateProfileImage = async (email: string, file: Express.Multer.File) => {
     if (!file) {
-      throw new ApiError("Image is required", 400);
+      throw new ApiError("Image is required", 400, 1);
     }
 
     const uploadResult = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader
         .upload_stream({ folder: "profiles" }, (error, result) => {
           if (error || !result) {
-            return reject(new ApiError("Failed to upload image", 500));
+            return reject(new ApiError("Failed to upload image", 500, 102));
           }
           resolve(result);
         })
@@ -97,7 +97,7 @@ export class MembershipService {
     );
 
     if ((updateResult.rowCount ?? 0) === 0) {
-      throw new ApiError("User not found", 404);
+      throw new ApiError("User not found", 404, 102);
     }
 
     return updateResult.rows[0];
@@ -112,10 +112,10 @@ export class MembershipService {
     const { email, password, first_name, last_name } = payload;
 
     const normalizedEmail = email?.trim().toLowerCase();
-    if (!normalizedEmail) throw new ApiError("Email is required!", 400);
-    if (!password) throw new ApiError("Password is required!", 400);
-    if (!first_name) throw new ApiError("First name is required!", 400);
-    if (!last_name) throw new ApiError("Last name is required!", 400);
+    if (!normalizedEmail) throw new ApiError("Email is required!", 400, 102);
+    if (!password) throw new ApiError("Password is required!", 400, 102);
+    if (!first_name) throw new ApiError("First name is required!", 400, 102);
+    if (!last_name) throw new ApiError("Last name is required!", 400, 102);
 
     // cek email apakah sudah terdaftar oleh user yang lain
     const checkUser = await pool.query(
@@ -124,7 +124,7 @@ export class MembershipService {
     );
 
     if ((checkUser.rowCount ?? 0) > 0) {
-      throw new ApiError("Email already registered", 409);
+      throw new ApiError("Email already registered", 409, 102);
     }
 
     // pasword akan dihash sebelum masuk ke database
@@ -162,8 +162,8 @@ export class MembershipService {
   login = async (body: { email: string; password: string }) => {
     const { email, password } = body;
     const normalizedEmail = email?.trim().toLowerCase();
-    if (!normalizedEmail) throw new ApiError("Email is required!", 400);
-    if (!password) throw new ApiError("Password is required!", 400);
+    if (!normalizedEmail) throw new ApiError("Email is required!", 400, 102);
+    if (!password) throw new ApiError("Password is required!", 400, 102);
 
     const result = await pool.query(
       `
@@ -182,7 +182,7 @@ export class MembershipService {
     );
 
     if ((result.rowCount ?? 0) === 0) {
-      throw new ApiError("Invalid email or password", 401);
+      throw new ApiError("Invalid email or password", 401, 102);
     }
 
     const user = result.rows[0];
@@ -193,7 +193,7 @@ export class MembershipService {
     );
 
     if (!isPasswordValid) {
-      throw new ApiError("Invalid email or password", 401);
+      throw new ApiError("Invalid email or password", 401, 102);
     }
 
     const payload = {

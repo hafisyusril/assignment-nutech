@@ -8,7 +8,7 @@ export const upload = multer({
   limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
   fileFilter: (_req, file, cb) => {
     if (!allowedMimeTypes.includes(file.mimetype)) {
-      return cb(new ApiError("Format Image tidak sesuai silakan pilih jpeg/png", 400));
+      return cb(new ApiError("Format Image tidak sesuai silakan pilih jpeg/png", 400, 102));
     }
     cb(null, true);
   },

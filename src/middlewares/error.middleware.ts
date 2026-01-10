@@ -8,7 +8,7 @@ export const errorMiddleware = (
   next: NextFunction
 ) => {
   let httpStatus = 500;
-  let code = 999;
+  let code = 1;
   let message = "Internal Server Error";
 
   // JWT Error
@@ -19,8 +19,8 @@ export const errorMiddleware = (
   }
   // Custom API Error
   if (err instanceof ApiError) {
-    httpStatus = err.status;
-    code = err.status;
+    httpStatus = err.httpStatus;
+    code = err.businessStatus;
     message = err.message;
   }
 

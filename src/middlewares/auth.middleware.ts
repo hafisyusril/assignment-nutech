@@ -18,12 +18,12 @@ export const authMiddleware = (
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return next(new ApiError("Authorization token required", 401));
+      return next(new ApiError("Token tidak valid atau kadaluwarsa", 401, 108));
     }
 
     const token = authHeader.split(" ")[1];
     if (!token) {
-      return next(new ApiError("Invalid authorization format", 401));
+      return next(new ApiError("Token tidak valid atau kadaluwarsa", 401, 108));
     }
 
     const decoded = jwt.verify(

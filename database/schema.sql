@@ -36,7 +36,7 @@ CREATE TABLE transactions (
   service_id UUID,
   transaction_type transaction_type_enum NOT NULL,
   description TEXT,
-  top_up_amount BIGINT NOT NULL,
+  total_amount BIGINT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT fk_user

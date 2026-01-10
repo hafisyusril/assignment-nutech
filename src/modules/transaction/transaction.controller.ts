@@ -4,6 +4,7 @@ import { AuthRequest } from "../../middlewares/auth.middleware";
 import { plainToInstance } from "class-transformer";
 import { TopupDTO } from "./dto/topup.dto";
 import { validate, validateOrReject } from "class-validator";
+import { TransactionDTO } from "./dto/transaction.dto";
 
 export class TransactionController {
   private transactionService: TransactionService;
@@ -29,11 +30,8 @@ export class TransactionController {
   topup = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const email = req.user!.email;
-      const dto: TopupDTO = req.body
-      const topupResult = await this.transactionService.topup(
-        dto,
-        email
-      );
+      const dto: TopupDTO = req.body;
+      const topupResult = await this.transactionService.topup(dto, email);
       res.status(200).json({
         status: 0,
         message: "Top Up Balance berhasil",
@@ -41,6 +39,21 @@ export class TransactionController {
       });
     } catch (error) {
       console.error(error);
+      next(error);
+    }
+  };
+
+  transaction = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const email = req.user!.email;
+        const dto: TransactionDTO = req.body;
+        const transactionResult = await this.transactionService.transaction(dto, email);
+        res.status(200).json({
+          status: 0,
+          message: "Transaksi berhasil",
+          data: transactionResult,
+        });
+    } catch (error) {
       next(error);
     }
   };

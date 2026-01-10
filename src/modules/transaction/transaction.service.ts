@@ -1,3 +1,4 @@
+import { query } from "express-validator";
 import { pool } from "../../config/db";
 import { ApiError } from "../../utils/api-error";
 import { generateInvoiceNumber } from "../../utils/generate-invoice";
@@ -131,5 +132,46 @@ export class TransactionService {
     }
   };
 
-  transactionHistory = async (email: string) => {};
+  transactionHistory = async (
+    email: string,
+    limit?: number,
+    offset?: number
+  ) => {
+    const userResult = await pool.query(
+      `SELECT id FROM users WHERE email = $1`,
+      [email]
+    );
+
+    if ((userResult.rowCount ?? 0) === 0) {
+      throw new ApiError("User not found", 404, 102);
+    }
+
+    const userId = userResult.rows[0].id;
+
+    let query = `SELECT invoice_number, transaction_type, description, total_amount, created_at AS created_on FROM transactions WHERE user_id = $1 ORDER BY created_at DESC`;
+
+    const values: any[] = [userId];
+
+    if (limit !== undefined) {
+      values.push(limit);
+      query += ` LIMIT $${values.length} `;
+    }
+    if (offset !== undefined) {
+      values.push(offset);
+      query += ` OFFSET $${values.length}`;
+    }
+
+    const result = await pool.query(query, values);
+
+    const records = result.rows.map((row) => ({
+      ...row,
+      total_amount: Number(row.total_amount),
+    }));
+
+    return {
+      offset: offset ?? 0,
+      limit: limit ?? records.length,
+      records,
+    };
+  };
 }

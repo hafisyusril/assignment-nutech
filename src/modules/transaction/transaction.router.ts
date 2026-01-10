@@ -21,6 +21,11 @@ export class TransactionRouter {
       authMiddleware,
       this.transactionController.getBalance
     );
+    this.router.get(
+      "/transaction/history",
+      authMiddleware,
+      this.transactionController.transactionHistory
+    );
     this.router.post(
       "/topup",
       authMiddleware,

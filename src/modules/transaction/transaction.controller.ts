@@ -45,14 +45,39 @@ export class TransactionController {
 
   transaction = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const email = req.user!.email;
-        const dto: TransactionDTO = req.body;
-        const transactionResult = await this.transactionService.transaction(dto, email);
-        res.status(200).json({
-          status: 0,
-          message: "Transaksi berhasil",
-          data: transactionResult,
-        });
+      const email = req.user!.email;
+      const dto: TransactionDTO = req.body;
+      const transactionResult = await this.transactionService.transaction(
+        dto,
+        email
+      );
+      res.status(200).json({
+        status: 0,
+        message: "Transaksi berhasil",
+        data: transactionResult,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  transactionHistory = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const email = req.user!.email;
+      const limit = req.query.limit ? Number(req.query.limit) : undefined;
+      const offset = req.query.offset ? Number(req.query.offset) : undefined;
+
+      const transactionHistory =
+        await this.transactionService.transactionHistory(email, limit, offset);
+      res.status(200).json({
+        status: 0,
+        message: "Get History Berhasil",
+        data: transactionHistory,
+      });
     } catch (error) {
       next(error);
     }

@@ -15,7 +15,7 @@ export class MembershipRouter {
 
   private initializeRoutes = () => {
     this.router.get(
-      "/users",
+      "/user",
       authMiddleware,
       this.membershipController.getProfile
     );

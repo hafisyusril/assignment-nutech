@@ -1,6 +1,7 @@
 import express, { Express, Request, Response, urlencoded } from "express";
 import { MembershipRouter } from "./modules/membership/membership.router";
 import { errorMiddleware } from "./middlewares/error.middleware";
+import { InformationRouter } from "./modules/information/information.router";
 
 export default class App {
   private app: Express;
@@ -18,8 +19,9 @@ export default class App {
 
   private routes(): void {
     const membershipRouter = new MembershipRouter();
-
-    this.app.use("/api/auth", membershipRouter.getRouter());
+    const informationRouter = new InformationRouter();
+    this.app.use(membershipRouter.getRouter());
+    this.app.use(informationRouter.getRouter());
   }
 
   private handleError(): void {

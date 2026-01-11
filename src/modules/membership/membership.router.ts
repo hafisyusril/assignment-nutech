@@ -18,12 +18,12 @@ export class MembershipRouter {
 
   private initializeRoutes = () => {
     this.router.get(
-      "/user",
+      "/profile",
       authMiddleware,
       this.membershipController.getProfile
     );
     this.router.post(
-      "/register",
+      "/registration",
       validateDtoMiddleware(RegisterDTO),
       this.membershipController.registration
     );

@@ -112,10 +112,10 @@ export class MembershipService {
     const { email, password, first_name, last_name } = payload;
 
     const normalizedEmail = email?.trim().toLowerCase();
-    if (!normalizedEmail) throw new ApiError("Email is required!", 400, 102);
-    if (!password) throw new ApiError("Password is required!", 400, 102);
-    if (!first_name) throw new ApiError("First name is required!", 400, 102);
-    if (!last_name) throw new ApiError("Last name is required!", 400, 102);
+    if (!normalizedEmail) throw new ApiError("Email harus diisi!", 400, 102);
+    if (!password) throw new ApiError("Password harus diisi!", 400, 102);
+    if (!first_name) throw new ApiError("First harus diisi!", 400, 102);
+    if (!last_name) throw new ApiError("Last harus diisi!", 400, 102);
 
     // cek email apakah sudah terdaftar oleh user yang lain
     const checkUser = await pool.query(
@@ -124,7 +124,7 @@ export class MembershipService {
     );
 
     if ((checkUser.rowCount ?? 0) > 0) {
-      throw new ApiError("Email already registered", 409, 102);
+      throw new ApiError("Email sudah terdaftar", 409, 102);
     }
 
     // pasword akan dihash sebelum masuk ke database
@@ -162,8 +162,8 @@ export class MembershipService {
   login = async (body: { email: string; password: string }) => {
     const { email, password } = body;
     const normalizedEmail = email?.trim().toLowerCase();
-    if (!normalizedEmail) throw new ApiError("Email is required!", 400, 102);
-    if (!password) throw new ApiError("Password is required!", 400, 102);
+    if (!normalizedEmail) throw new ApiError("Email harus diisi!", 400, 102);
+    if (!password) throw new ApiError("Password harus diisi!", 400, 102);
 
     const result = await pool.query(
       `
@@ -182,7 +182,7 @@ export class MembershipService {
     );
 
     if ((result.rowCount ?? 0) === 0) {
-      throw new ApiError("Invalid email or password", 401, 102);
+      throw new ApiError("Username atau password salah", 401, 102);
     }
 
     const user = result.rows[0];
@@ -193,7 +193,7 @@ export class MembershipService {
     );
 
     if (!isPasswordValid) {
-      throw new ApiError("Invalid email or password", 401, 102);
+      throw new ApiError("Username atau password salah", 401, 102);
     }
 
     const payload = {

@@ -2,6 +2,9 @@ import { Router } from "express";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import { MembershipController } from "./membership.controller";
 import { upload } from "../../middlewares/uploader.middleware";
+import { validateDtoMiddleware } from "../../middlewares/validate.dto.middleware";
+import { RegisterDTO } from "./dto/register.dto";
+import { LoginDTO } from "./dto/login.dto";
 
 export class MembershipRouter {
   private router: Router;
@@ -19,8 +22,16 @@ export class MembershipRouter {
       authMiddleware,
       this.membershipController.getProfile
     );
-    this.router.post("/register", this.membershipController.registration);
-    this.router.post("/login", this.membershipController.login);
+    this.router.post(
+      "/register",
+      validateDtoMiddleware(RegisterDTO),
+      this.membershipController.registration
+    );
+    this.router.post(
+      "/login",
+      validateDtoMiddleware(LoginDTO),
+      this.membershipController.login
+    );
     this.router.put(
       "/profile/update",
       authMiddleware,

@@ -11,7 +11,7 @@ export class TransactionService {
       `SELECT balance FROM users WHERE email = $1`,
       [email]
     );
-    return result.rows[0];
+    return { balance: Number(result.rows[0].balance) };
   };
 
   topup = async (body: TopupDTO, email: string) => {

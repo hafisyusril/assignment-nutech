@@ -206,7 +206,7 @@ export class MembershipService {
     const token = createToken({
       payload,
       secretKey: process.env.JWT_SECRET_KEY!,
-      options: { expiresIn: "1h" },
+      options: { expiresIn: "12h" },
     });
 
     return { payload, token };
